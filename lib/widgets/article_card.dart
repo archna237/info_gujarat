@@ -6,6 +6,7 @@ class ArticleCard extends StatelessWidget {
   final String category;
   final String date;
   final String imageUrl;
+  final bool isVideo;
 
   const ArticleCard({
     super.key,
@@ -13,6 +14,7 @@ class ArticleCard extends StatelessWidget {
     required this.category,
     required this.date,
     required this.imageUrl,
+    this.isVideo = false,
   });
 
   @override
@@ -32,17 +34,30 @@ class ArticleCard extends StatelessWidget {
               // Image
               ClipRRect(
                 borderRadius: BorderRadius.circular(10),
-                child: Image.network(
-                  imageUrl,
-                  height: 100,
-                  width: 100,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) => Container(
-                    height: 100,
-                    width: 100,
-                    color: Colors.grey.shade300,
-                    child: const Icon(Icons.image_not_supported, color: Colors.grey),
-                  ),
+                child: Stack(
+                  children: [
+                    Image.network(
+                      imageUrl,
+                      height: 100,
+                      width: 100,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => Container(
+                        height: 100,
+                        width: 100,
+                        color: Colors.grey.shade300,
+                        child: const Icon(Icons.image_not_supported, color: Colors.grey),
+                      ),
+                    ),
+                    if (isVideo)
+                      Positioned.fill(
+                        child: Container(
+                          color: Colors.black.withOpacity(0.25),
+                          child: const Center(
+                            child: Icon(Icons.play_circle_fill, color: Colors.white, size: 30),
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
               ),
               const SizedBox(width: AppConstants.paddingMedium),

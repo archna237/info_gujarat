@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../core/constants.dart';
+import '../models/news_category.dart';
 import '../models/news_item.dart';
 import '../services/infogujarat_service.dart';
 import '../widgets/article_card.dart';
@@ -15,18 +16,58 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final InfoGujaratService _service = InfoGujaratService();
   late Future<List<NewsItem>> _newsFuture;
-  String _selectedCategory = 'All';
+  List<NewsCategory> _categories = const [];
+  int? _selectedCategoryId;
+  bool _isBootstrapping = true;
+  String? _bootstrapError;
 
   @override
   void initState() {
     super.initState();
-    _newsFuture = _service.fetchHomepageNews();
+    _newsFuture = Future.value(const []);
+    _bootstrap();
+  }
+
+  Future<void> _bootstrap() async {
+    try {
+      final categories = await _service.fetchCategories();
+      final initialCategoryId = categories.first.id;
+      setState(() {
+        _categories = categories;
+        _selectedCategoryId = initialCategoryId;
+        _newsFuture = _service.fetchNewsByCategory(
+          initialCategoryId,
+          includeTopVideos: initialCategoryId == 1,
+        );
+        _isBootstrapping = false;
+        _bootstrapError = null;
+      });
+    } catch (e) {
+      setState(() {
+        _bootstrapError = '$e';
+        _isBootstrapping = false;
+      });
+    }
   }
 
   void _refreshNews() {
+    if (_selectedCategoryId == null) return;
     setState(() {
-      _newsFuture = _service.fetchHomepageNews();
-      _selectedCategory = 'All';
+      _newsFuture = _service.fetchNewsByCategory(
+        _selectedCategoryId!,
+        includeTopVideos: _selectedCategoryId == 1,
+      );
+    });
+  }
+
+  void _onCategorySelected(int id) {
+    if (_selectedCategoryId == id) return;
+    setState(() {
+      _selectedCategoryId = id;
+      _newsFuture = _service.fetchNewsByCategory(
+        id,
+        includeTopVideos: id == 1,
+      );
     });
   }
 
@@ -49,159 +90,166 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           IconButton(
             icon: const Icon(Icons.refresh),
-            onPressed: _refreshNews,
+            onPressed: _isBootstrapping ? null : _refreshNews,
           ),
         ],
       ),
-      body: FutureBuilder<List<NewsItem>>(
-        future: _newsFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
+      body: _isBootstrapping
+          ? const Center(child: CircularProgressIndicator())
+          : _bootstrapError != null
+              ? Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(AppConstants.paddingLarge),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.error_outline, size: 48),
+                        const SizedBox(height: AppConstants.paddingMedium),
+                        Text(_bootstrapError!, textAlign: TextAlign.center),
+                        const SizedBox(height: AppConstants.paddingMedium),
+                        ElevatedButton(
+                          onPressed: _bootstrap,
+                          child: const Text('Retry'),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              : _buildNewsBody(),
+    );
+  }
 
-          if (snapshot.hasError) {
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(AppConstants.paddingLarge),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
+  Widget _buildNewsBody() {
+    return FutureBuilder<List<NewsItem>>(
+      future: _newsFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (snapshot.hasError) {
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(AppConstants.paddingLarge),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.error_outline, size: 48),
+                  const SizedBox(height: AppConstants.paddingMedium),
+                  Text(
+                    'Could not load latest updates.',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: AppConstants.paddingSmall),
+                  Text(
+                    '${snapshot.error}',
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                  const SizedBox(height: AppConstants.paddingMedium),
+                  ElevatedButton(
+                    onPressed: _refreshNews,
+                    child: const Text('Retry'),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
+        final allNews = snapshot.data ?? <NewsItem>[];
+        if (allNews.isEmpty) {
+          return Center(
+            child: ElevatedButton(
+              onPressed: _refreshNews,
+              child: const Text('Reload News'),
+            ),
+          );
+        }
+
+        final carouselItems = allNews.take(5).map((item) {
+          return {
+            'title': item.title,
+            'category': item.category,
+            'date': item.date,
+            'imageUrl': item.imageUrl,
+            'isVideo': item.isVideo.toString(),
+          };
+        }).toList();
+
+        return SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: AppConstants.paddingMedium),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: AppConstants.paddingMedium),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Icon(Icons.error_outline, size: 48),
-                    const SizedBox(height: AppConstants.paddingMedium),
                     Text(
-                      'Could not load latest updates.',
-                      style: Theme.of(context).textTheme.titleMedium,
+                      'Breaking News',
+                      style: Theme.of(context).textTheme.titleLarge,
                     ),
-                    const SizedBox(height: AppConstants.paddingSmall),
-                    Text(
-                      '${snapshot.error}',
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                    const SizedBox(height: AppConstants.paddingMedium),
-                    ElevatedButton(
+                    TextButton(
                       onPressed: _refreshNews,
-                      child: const Text('Retry'),
+                      child: const Text('Refresh'),
                     ),
                   ],
                 ),
               ),
-            );
-          }
-
-          final allNews = snapshot.data ?? <NewsItem>[];
-          if (allNews.isEmpty) {
-            return Center(
-              child: ElevatedButton(
-                onPressed: _refreshNews,
-                child: const Text('Reload News'),
-              ),
-            );
-          }
-
-          final categories = <String>[
-            'All',
-            ...allNews
-                .map((item) => item.category)
-                .where((category) => category.trim().isNotEmpty)
-                .toSet(),
-          ];
-
-          if (!categories.contains(_selectedCategory)) {
-            _selectedCategory = 'All';
-          }
-
-          final filteredNews = _selectedCategory == 'All'
-              ? allNews
-              : allNews.where((item) => item.category == _selectedCategory).toList();
-
-          final carouselItems = allNews.take(5).map((item) {
-            return {
-              'title': item.title,
-              'category': item.category,
-              'date': item.date,
-              'imageUrl': item.imageUrl,
-            };
-          }).toList();
-
-          return SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: AppConstants.paddingMedium),
-                Padding(
+              const SizedBox(height: AppConstants.paddingSmall),
+              FeaturedCarousel(items: carouselItems),
+              const SizedBox(height: AppConstants.paddingLarge),
+              SizedBox(
+                height: 40,
+                child: ListView.separated(
                   padding: const EdgeInsets.symmetric(horizontal: AppConstants.paddingMedium),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Breaking News',
-                        style: Theme.of(context).textTheme.titleLarge,
-                      ),
-                      TextButton(
-                        onPressed: _refreshNews,
-                        child: const Text('Refresh'),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: AppConstants.paddingSmall),
-                FeaturedCarousel(items: carouselItems),
-                const SizedBox(height: AppConstants.paddingLarge),
-                SizedBox(
-                  height: 40,
-                  child: ListView.separated(
-                    padding: const EdgeInsets.symmetric(horizontal: AppConstants.paddingMedium),
-                    scrollDirection: Axis.horizontal,
-                    itemCount: categories.length,
-                    separatorBuilder: (context, index) =>
-                        const SizedBox(width: AppConstants.paddingSmall),
-                    itemBuilder: (context, index) {
-                      final category = categories[index];
-                      final selected = category == _selectedCategory;
-                      return ChoiceChip(
-                        label: Text(category),
-                        selected: selected,
-                        onSelected: (_) {
-                          setState(() {
-                            _selectedCategory = category;
-                          });
-                        },
-                      );
-                    },
-                  ),
-                ),
-                const SizedBox(height: AppConstants.paddingLarge),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: AppConstants.paddingMedium),
-                  child: Text(
-                    'Recent Updates',
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                ),
-                const SizedBox(height: AppConstants.paddingSmall),
-                ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: AppConstants.paddingMedium),
-                  physics: const NeverScrollableScrollPhysics(),
-                  shrinkWrap: true,
-                  itemCount: filteredNews.length,
+                  scrollDirection: Axis.horizontal,
+                  itemCount: _categories.length,
+                  separatorBuilder: (context, index) =>
+                      const SizedBox(width: AppConstants.paddingSmall),
                   itemBuilder: (context, index) {
-                    final item = filteredNews[index];
-                    return ArticleCard(
-                      title: item.title,
-                      category: item.category,
-                      date: item.date,
-                      imageUrl: item.imageUrl,
+                    final category = _categories[index];
+                    final selected = category.id == _selectedCategoryId;
+                    return ChoiceChip(
+                      label: Text(category.name),
+                      selected: selected,
+                      onSelected: (_) => _onCategorySelected(category.id),
                     );
                   },
                 ),
-                const SizedBox(height: AppConstants.paddingLarge),
-              ],
-            ),
-          );
-        },
-      ),
+              ),
+              const SizedBox(height: AppConstants.paddingLarge),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: AppConstants.paddingMedium),
+                child: Text(
+                  'Recent Updates',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+              ),
+              const SizedBox(height: AppConstants.paddingSmall),
+              ListView.builder(
+                padding: const EdgeInsets.symmetric(horizontal: AppConstants.paddingMedium),
+                physics: const NeverScrollableScrollPhysics(),
+                shrinkWrap: true,
+                itemCount: allNews.length,
+                itemBuilder: (context, index) {
+                  final item = allNews[index];
+                  return ArticleCard(
+                    title: item.title,
+                    category: item.category,
+                    date: item.date,
+                    imageUrl: item.imageUrl,
+                    isVideo: item.isVideo,
+                  );
+                },
+              ),
+              const SizedBox(height: AppConstants.paddingLarge),
+            ],
+          ),
+        );
+      },
     );
   }
 }

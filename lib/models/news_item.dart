@@ -4,6 +4,8 @@ class NewsItem {
   final String date;
   final String imageUrl;
   final String link;
+  final bool isVideo;
+  final String? videoUrl;
 
   const NewsItem({
     required this.title,
@@ -11,5 +13,7 @@ class NewsItem {
     required this.date,
     required this.imageUrl,
     required this.link,
+    this.isVideo = false,
+    this.videoUrl,
   });
 }

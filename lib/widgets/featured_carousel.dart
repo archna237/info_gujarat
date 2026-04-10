@@ -28,6 +28,7 @@ class _FeaturedCarouselState extends State<FeaturedCarousel> {
             },
             itemBuilder: (context, index) {
               final item = widget.items[index];
+              final isVideo = item['isVideo'] == 'true';
               return Container(
                 margin: const EdgeInsets.symmetric(horizontal: AppConstants.paddingMedium),
                 decoration: BoxDecoration(
@@ -65,6 +66,11 @@ class _FeaturedCarouselState extends State<FeaturedCarousel> {
                     mainAxisAlignment: MainAxisAlignment.end,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      if (isVideo)
+                        const Padding(
+                          padding: EdgeInsets.only(bottom: AppConstants.paddingSmall),
+                          child: Icon(Icons.play_circle_fill, color: Colors.white, size: 30),
+                        ),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
