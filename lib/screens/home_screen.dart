@@ -76,6 +76,15 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  void _openAndSave(NewsItem item) {
+    if (!_savedStore.isSaved(item)) {
+      setState(() {
+        _savedStore.toggle(item);
+      });
+    }
+    _openUrl(item.videoUrl ?? item.link);
+  }
+
   Future<void> _openUrl(String url) async {
     final uri = Uri.parse(url);
     bool launched = false;
@@ -143,7 +152,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 context: context,
                 delegate: NewsSearchDelegate(
                   items: _latestItems,
-                  onItemTap: (item) => _openUrl(item.videoUrl ?? item.link),
+                  onItemTap: _openAndSave,
                   isSaved: _savedStore.isSaved,
                   onBookmarkTap: (item) => _savedStore.toggle(item),
                 ),
@@ -266,7 +275,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 items: carouselItems,
                 onItemTap: (index) {
                   final item = allNews[index];
-                  _openUrl(item.videoUrl ?? item.link);
+                  _openAndSave(item);
                 },
               ),
               const SizedBox(height: AppConstants.paddingLarge),
@@ -312,7 +321,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     imageUrl: item.imageUrl,
                     isVideo: item.isVideo,
                     isSaved: _savedStore.isSaved(item),
-                    onTap: () => _openUrl(item.videoUrl ?? item.link),
+                    onTap: () => _openAndSave(item),
                     onBookmarkTap: () {
                       setState(() {
                         _savedStore.toggle(item);

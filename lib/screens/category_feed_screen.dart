@@ -66,6 +66,15 @@ class _CategoryFeedScreenState extends State<CategoryFeedScreen> {
     });
   }
 
+  void _openAndSave(NewsItem item) {
+    if (!_savedStore.isSaved(item)) {
+      setState(() {
+        _savedStore.toggle(item);
+      });
+    }
+    _openUrl(item.videoUrl ?? item.link);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -123,7 +132,7 @@ class _CategoryFeedScreenState extends State<CategoryFeedScreen> {
                 imageUrl: item.imageUrl,
                 isVideo: item.isVideo,
                 isSaved: _savedStore.isSaved(item),
-                onTap: () => _openUrl(item.videoUrl ?? item.link),
+                onTap: () => _openAndSave(item),
                 onBookmarkTap: () {
                   setState(() {
                     _savedStore.toggle(item);
