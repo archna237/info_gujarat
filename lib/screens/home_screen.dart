@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../core/constants.dart';
 import '../models/news_category.dart';
 import '../models/news_item.dart';
@@ -69,6 +70,35 @@ class _HomeScreenState extends State<HomeScreen> {
         includeTopVideos: id == 1,
       );
     });
+  }
+
+  Future<void> _openUrl(String url) async {
+    final uri = Uri.parse(url);
+    bool launched = false;
+    try {
+      launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } catch (_) {
+      launched = false;
+    }
+    if (!launched) {
+      try {
+        launched = await launchUrl(uri, mode: LaunchMode.externalNonBrowserApplication);
+      } catch (_) {
+        launched = false;
+      }
+    }
+    if (!launched) {
+      try {
+        launched = await launchUrl(uri, mode: LaunchMode.platformDefault);
+      } catch (_) {
+        launched = false;
+      }
+    }
+    if (!launched && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Unable to open link')),
+      );
+    }
   }
 
   @override
@@ -199,7 +229,13 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               const SizedBox(height: AppConstants.paddingSmall),
-              FeaturedCarousel(items: carouselItems),
+              FeaturedCarousel(
+                items: carouselItems,
+                onItemTap: (index) {
+                  final item = allNews[index];
+                  _openUrl(item.videoUrl ?? item.link);
+                },
+              ),
               const SizedBox(height: AppConstants.paddingLarge),
               SizedBox(
                 height: 40,
@@ -242,6 +278,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     date: item.date,
                     imageUrl: item.imageUrl,
                     isVideo: item.isVideo,
+                    onTap: () => _openUrl(item.videoUrl ?? item.link),
                   );
                 },
               ),

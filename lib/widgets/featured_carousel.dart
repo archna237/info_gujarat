@@ -3,8 +3,13 @@ import '../core/constants.dart';
 
 class FeaturedCarousel extends StatefulWidget {
   final List<Map<String, String>> items;
+  final ValueChanged<int>? onItemTap;
 
-  const FeaturedCarousel({super.key, required this.items});
+  const FeaturedCarousel({
+    super.key,
+    required this.items,
+    this.onItemTap,
+  });
 
   @override
   State<FeaturedCarousel> createState() => _FeaturedCarouselState();
@@ -29,83 +34,87 @@ class _FeaturedCarouselState extends State<FeaturedCarousel> {
             itemBuilder: (context, index) {
               final item = widget.items[index];
               final isVideo = item['isVideo'] == 'true';
-              return Container(
-                margin: const EdgeInsets.symmetric(horizontal: AppConstants.paddingMedium),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
-                      blurRadius: 10,
-                      offset: const Offset(0, 5),
-                    ),
-                  ],
-                  image: DecorationImage(
-                    image: NetworkImage(item['imageUrl']!),
-                    fit: BoxFit.cover,
-                    colorFilter: ColorFilter.mode(
-                      Colors.black.withOpacity(0.3),
-                      BlendMode.darken,
-                    ),
-                  ),
-                ),
+              return InkWell(
+                borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
+                onTap: widget.onItemTap == null ? null : () => widget.onItemTap!(index),
                 child: Container(
+                  margin: const EdgeInsets.symmetric(horizontal: AppConstants.paddingMedium),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.transparent,
-                        Colors.black.withOpacity(0.8),
-                      ],
-                    ),
-                  ),
-                  padding: const EdgeInsets.all(AppConstants.paddingMedium),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (isVideo)
-                        const Padding(
-                          padding: EdgeInsets.only(bottom: AppConstants.paddingSmall),
-                          child: Icon(Icons.play_circle_fill, color: Colors.white, size: 30),
-                        ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.primary,
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(
-                          item['category']!.toUpperCase(),
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: AppConstants.paddingSmall),
-                      Text(
-                        item['title']!,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        item['date']!,
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.8),
-                          fontSize: 12,
-                        ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.2),
+                        blurRadius: 10,
+                        offset: const Offset(0, 5),
                       ),
                     ],
+                    image: DecorationImage(
+                      image: NetworkImage(item['imageUrl']!),
+                      fit: BoxFit.cover,
+                      colorFilter: ColorFilter.mode(
+                        Colors.black.withOpacity(0.3),
+                        BlendMode.darken,
+                      ),
+                    ),
+                  ),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.transparent,
+                          Colors.black.withOpacity(0.8),
+                        ],
+                      ),
+                    ),
+                    padding: const EdgeInsets.all(AppConstants.paddingMedium),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (isVideo)
+                          const Padding(
+                            padding: EdgeInsets.only(bottom: AppConstants.paddingSmall),
+                            child: Icon(Icons.play_circle_fill, color: Colors.white, size: 30),
+                          ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.primary,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            item['category']!.toUpperCase(),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: AppConstants.paddingSmall),
+                        Text(
+                          item['title']!,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          item['date']!,
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(0.8),
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               );

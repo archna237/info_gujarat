@@ -7,6 +7,9 @@ class ArticleCard extends StatelessWidget {
   final String date;
   final String imageUrl;
   final bool isVideo;
+  final VoidCallback? onTap;
+  final bool isSaved;
+  final VoidCallback? onBookmarkTap;
 
   const ArticleCard({
     super.key,
@@ -15,6 +18,9 @@ class ArticleCard extends StatelessWidget {
     required this.date,
     required this.imageUrl,
     this.isVideo = false,
+    this.onTap,
+    this.isSaved = false,
+    this.onBookmarkTap,
   });
 
   @override
@@ -23,9 +29,7 @@ class ArticleCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: AppConstants.paddingMedium),
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
-        onTap: () {
-          // TODO: Navigate to detail page
-        },
+        onTap: onTap,
         child: Padding(
           padding: const EdgeInsets.all(AppConstants.paddingSmall),
           child: Row(
@@ -88,10 +92,15 @@ class ArticleCard extends StatelessWidget {
                               ),
                             ),
                           ),
-                          Icon(
-                            Icons.bookmark_border,
-                            size: 20,
-                            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                          IconButton(
+                            onPressed: onBookmarkTap,
+                            icon: Icon(
+                              isSaved ? Icons.bookmark : Icons.bookmark_border,
+                              size: 20,
+                              color: isSaved
+                                  ? Theme.of(context).colorScheme.primary
+                                  : Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                            ),
                           ),
                         ],
                       ),
