@@ -67,33 +67,40 @@ class ArticleCard extends StatelessWidget {
               const SizedBox(width: AppConstants.paddingMedium),
               // Content
               Expanded(
-                child: SizedBox(
-                  height: 100,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(minHeight: 100),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       // Category & Bookmark
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Text(
-                              category.toUpperCase(),
-                              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                color: Theme.of(context).colorScheme.primary,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 10,
+                          Flexible(
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text(
+                                category.toUpperCase(),
+                                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                  color: Theme.of(context).colorScheme.primary,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 10,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
                           ),
+                          const SizedBox(width: 8),
                           IconButton(
                             onPressed: onBookmarkTap,
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints.tightFor(width: 24, height: 24),
+                            visualDensity: VisualDensity.compact,
                             icon: Icon(
                               isSaved ? Icons.bookmark : Icons.bookmark_border,
                               size: 20,
