@@ -118,7 +118,7 @@ class InfoGujaratService {
                 : '');
 
         final link = isVideo
-            ? _youtubeWatch(videoId!)
+            ? _youtubeWatch(videoId)
             : 'https://infogujarat.com/share?nid=${map['id']}';
         final uniqueKey = '${title.toLowerCase()}_$link';
         if (seen.contains(uniqueKey)) continue;

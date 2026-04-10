@@ -3,9 +3,11 @@ import 'package:url_launcher/url_launcher.dart';
 import '../core/constants.dart';
 import '../models/news_category.dart';
 import '../models/news_item.dart';
+import '../services/saved_items_store.dart';
 import '../services/infogujarat_service.dart';
 import '../widgets/article_card.dart';
 import '../widgets/featured_carousel.dart';
+import 'news_search_delegate.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -16,8 +18,10 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final InfoGujaratService _service = InfoGujaratService();
+  final SavedItemsStore _savedStore = SavedItemsStore.instance;
   late Future<List<NewsItem>> _newsFuture;
   List<NewsCategory> _categories = const [];
+  List<NewsItem> _latestItems = const [];
   int? _selectedCategoryId;
   bool _isBootstrapping = true;
   String? _bootstrapError;
@@ -105,18 +109,46 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          AppConstants.appName,
-          style: TextStyle(fontWeight: FontWeight.bold),
+        title: Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(6),
+              child: Image.network(
+                'https://infogujarat.com/images/260319161833news_logo.png',
+                height: 28,
+                width: 28,
+                fit: BoxFit.cover,
+              ),
+            ),
+            const SizedBox(width: 8),
+            const Text(
+              AppConstants.appName,
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ],
         ),
         actions: [
           IconButton(
             icon: const Icon(Icons.notifications_none),
-            onPressed: () {},
+            onPressed: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('No notifications right now.')),
+              );
+            },
           ),
           IconButton(
             icon: const Icon(Icons.search),
-            onPressed: () {},
+            onPressed: () {
+              showSearch(
+                context: context,
+                delegate: NewsSearchDelegate(
+                  items: _latestItems,
+                  onItemTap: (item) => _openUrl(item.videoUrl ?? item.link),
+                  isSaved: _savedStore.isSaved,
+                  onBookmarkTap: (item) => _savedStore.toggle(item),
+                ),
+              );
+            },
           ),
           IconButton(
             icon: const Icon(Icons.refresh),
@@ -188,6 +220,7 @@ class _HomeScreenState extends State<HomeScreen> {
         }
 
         final allNews = snapshot.data ?? <NewsItem>[];
+        _latestItems = allNews;
         if (allNews.isEmpty) {
           return Center(
             child: ElevatedButton(
@@ -278,7 +311,13 @@ class _HomeScreenState extends State<HomeScreen> {
                     date: item.date,
                     imageUrl: item.imageUrl,
                     isVideo: item.isVideo,
+                    isSaved: _savedStore.isSaved(item),
                     onTap: () => _openUrl(item.videoUrl ?? item.link),
+                    onBookmarkTap: () {
+                      setState(() {
+                        _savedStore.toggle(item);
+                      });
+                    },
                   );
                 },
               ),
