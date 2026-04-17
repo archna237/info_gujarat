@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'home_screen.dart';
+import 'website_view_screen.dart';
 import 'categories_screen.dart';
 import 'saved_screen.dart';
 import 'settings_screen.dart';
@@ -15,7 +15,7 @@ class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
 
   final List<Widget> _screens = [
-    const HomeScreen(),
+    const WebsiteViewScreen(),
     const CategoriesScreen(),
     const SavedScreen(),
     const SettingsScreen(),
