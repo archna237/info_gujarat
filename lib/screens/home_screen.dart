@@ -122,8 +122,8 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(6),
-              child: Image.network(
-                'https://infogujarat.com/images/260319161833news_logo.png',
+              child: Image.asset(
+                'assets/inf_logo.jpeg',
                 height: 28,
                 width: 28,
                 fit: BoxFit.cover,

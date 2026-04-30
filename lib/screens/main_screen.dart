@@ -18,7 +18,7 @@ class _MainScreenState extends State<MainScreen> {
     const WebsiteViewScreen(),
     const CategoriesScreen(),
     const SavedScreen(),
-    const SettingsScreen(),
+    //const SettingsScreen(),
   ];
 
   @override

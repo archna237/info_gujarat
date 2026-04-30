@@ -118,8 +118,7 @@ class ArticleCard extends StatelessWidget {
                           fontWeight: FontWeight.w600,
                           height: 1.3,
                         ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
+                        overflow: TextOverflow.visible,
                       ),
                       // Date
                       Text(

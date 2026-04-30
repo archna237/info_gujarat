@@ -50,9 +50,28 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.14.3
+  flutter_native_splash: ^2.4.4
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
+
+# flutter_launcher_icons configuration
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/inf_logo.jpeg"
+  adaptive_icon_background: "#ffffff"
+  adaptive_icon_foreground: "assets/inf_logo.jpeg"
+  remove_alpha_ios: true
+
+# flutter_native_splash configuration
+flutter_native_splash:
+  color: "#ffffff"
+  image: "assets/inf_logo.jpeg"
+  android_12:
+    image: "assets/inf_logo.jpeg"
+    color: "#ffffff"
 
 # The following section is specific to Flutter packages.
 flutter:
@@ -63,9 +82,9 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  # assets:
-  #   - images/a_dot_burr.jpeg
-  #   - images/a_dot_ham.jpeg
+  assets:
+    - assets/inf_logo.jpeg
+    - assets/logo.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

@@ -95,16 +95,15 @@ class _FeaturedCarouselState extends State<FeaturedCarousel> {
                           ),
                         ),
                         const SizedBox(height: AppConstants.paddingSmall),
-                        Text(
-                          item['title']!,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
+                          Text(
+                            item['title']!,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            overflow: TextOverflow.visible,
                           ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
                         const SizedBox(height: 4),
                         Text(
                           item['date']!,
