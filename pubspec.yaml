@@ -39,6 +39,7 @@ dependencies:
   html: ^0.15.6
   url_launcher: ^6.3.2
   webview_flutter: ^4.13.0
+  image: ^4.8.0
 
 dev_dependencies:
   flutter_test:
@@ -68,9 +69,7 @@ flutter_launcher_icons:
 # flutter_native_splash configuration
 flutter_native_splash:
   color: "#ffffff"
-  image: "assets/inf_logo.jpeg"
   android_12:
-    image: "assets/inf_logo.jpeg"
     color: "#ffffff"
 
 # The following section is specific to Flutter packages.

@@ -23,7 +23,7 @@ class _FeaturedCarouselState extends State<FeaturedCarousel> {
     return Column(
       children: [
         SizedBox(
-          height: 200,
+          height: 280, // Increased height to prevent text from being cut
           child: PageView.builder(
             itemCount: widget.items.length,
             onPageChanged: (index) {
@@ -102,7 +102,8 @@ class _FeaturedCarouselState extends State<FeaturedCarousel> {
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
                             ),
-                            overflow: TextOverflow.visible,
+                            maxLines: 3,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         const SizedBox(height: 4),
                         Text(
