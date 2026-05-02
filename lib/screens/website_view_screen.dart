@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
@@ -78,6 +79,34 @@ class _WebsiteViewScreenState extends State<WebsiteViewScreen> {
                   }
                 }, true);
               }
+
+              // Fix Marquee/Running text and set to red
+              var style = document.createElement('style');
+              style.innerHTML = `
+                marquee, .marquee, .breaking-news {
+                  color: red !important;
+                  height: auto !important;
+                  min-height: 40px !important;
+                  overflow: visible !important;
+                  padding: 8px 0 !important;
+                  line-height: 1.6 !important;
+                  font-weight: bold !important;
+                  display: flex !important;
+                  align-items: center !important;
+                }
+                marquee * { 
+                  color: red !important;
+                  line-height: 1.6 !important;
+                }
+                /* Target the container of the marquee to ensure it doesn't clip */
+                marquee.parentElement, .breaking-news-container {
+                  height: auto !important;
+                  min-height: 45px !important;
+                  overflow: visible !important;
+                  padding: 2px 0 !important;
+                }
+              `;
+              document.head.appendChild(style);
             ''');
           },
           onNavigationRequest: (NavigationRequest request) async {
@@ -143,18 +172,11 @@ class _WebsiteViewScreenState extends State<WebsiteViewScreen> {
           canPop: false,
           onPopInvokedWithResult: (didPop, result) async {
             if (didPop) return;
-            final messenger = ScaffoldMessenger.of(context);
             if (_controller != null && await _controller!.canGoBack()) {
               await _controller!.goBack();
             } else {
-              // If cannot go back, show a hint or just stay
-              messenger.showSnackBar(
-                const SnackBar(
-                  content: Text('Press back again to exit'),
-                  duration: Duration(seconds: 2),
-                ),
-              );
-              // In a real app, you might want to actually pop here if it's not the root
+              // If cannot go back, exit the app
+              await SystemNavigator.pop();
             }
           },
           child: Stack(

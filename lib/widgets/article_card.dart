@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../core/constants.dart';
 
 class ArticleCard extends StatelessWidget {
@@ -40,12 +41,18 @@ class ArticleCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(10),
                 child: Stack(
                   children: [
-                    Image.network(
-                      imageUrl,
+                    CachedNetworkImage(
+                      imageUrl: imageUrl,
                       height: 100,
                       width: 100,
                       fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => Container(
+                      placeholder: (context, url) => Container(
+                        height: 100,
+                        width: 100,
+                        color: Colors.grey.shade200,
+                        child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
+                      ),
+                      errorWidget: (context, url, error) => Container(
                         height: 100,
                         width: 100,
                         color: Colors.grey.shade300,

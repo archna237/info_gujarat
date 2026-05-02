@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../core/constants.dart';
 
 class FeaturedCarousel extends StatefulWidget {
@@ -49,7 +50,7 @@ class _FeaturedCarouselState extends State<FeaturedCarousel> {
                       ),
                     ],
                     image: DecorationImage(
-                      image: NetworkImage(item['imageUrl']!),
+                      image: CachedNetworkImageProvider(item['imageUrl']!),
                       fit: BoxFit.cover,
                       colorFilter: ColorFilter.mode(
                         Colors.black.withOpacity(0.3),
