@@ -62,9 +62,9 @@ dev_dependencies:
 flutter_launcher_icons:
   android: true
   ios: true
-  image_path: "assets/inf_logo.jpeg"
+  image_path: "lib/assets/INFO GUJARAT LOGO.png"
   adaptive_icon_background: "#ffffff"
-  adaptive_icon_foreground: "assets/inf_logo.jpeg"
+  adaptive_icon_foreground: "lib/assets/INFO GUJARAT LOGO.png"
   remove_alpha_ios: true
 
 # flutter_native_splash configuration
@@ -85,6 +85,7 @@ flutter:
   assets:
     - assets/inf_logo.jpeg
     - assets/logo.png
+    - lib/assets/INFO GUJARAT LOGO.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

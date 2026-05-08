@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:webview_flutter_android/webview_flutter_android.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 class WebsiteViewScreen extends StatefulWidget {
@@ -68,42 +69,49 @@ class _WebsiteViewScreenState extends State<WebsiteViewScreen> {
                     var rect = m.getBoundingClientRect();
                     if(e.clientX >= rect.left && e.clientX <= rect.right && 
                        e.clientY >= rect.top && e.clientY <= rect.bottom) {
+                      var wasPlaying = !m.paused;
                       m.muted = !m.muted;
+
+                      // Keep playback state unchanged when toggling mute/unmute.
+                      if (wasPlaying && m.paused) {
+                        m.play().catch(function() {});
+                      }
+
                       if (!m.muted) {
                         m.volume = 1.0;
-                        if (m.paused) {
-                          m.play();
-                        }
                       }
                     }
                   }
                 }, true);
               }
 
-              // Fix Marquee/Running text and set to red
+              // Remove any previously injected marquee style overrides.
+              var staleStyles = document.querySelectorAll('style[data-ig-marquee-fix], style[data-ig-marquee-old]');
+              for (var i = 0; i < staleStyles.length; i++) {
+                staleStyles[i].remove();
+              }
+
+              var allStyles = document.querySelectorAll('style');
+              for (var j = 0; j < allStyles.length; j++) {
+                var css = allStyles[j].innerHTML || '';
+                if (
+                  css.indexOf('marquee, .marquee, .breaking-news') !== -1 &&
+                  (css.indexOf('color: red') !== -1 || css.indexOf('background-color: #0a4ea3') !== -1)
+                ) {
+                  allStyles[j].setAttribute('data-ig-marquee-old', '1');
+                  allStyles[j].remove();
+                }
+              }
+
+              // Keep original website look. Only prevent clipping if device layout is tight.
               var style = document.createElement('style');
+              style.setAttribute('data-ig-marquee-fix', '1');
               style.innerHTML = `
                 marquee, .marquee, .breaking-news {
-                  color: red !important;
-                  height: auto !important;
-                  min-height: 40px !important;
                   overflow: visible !important;
-                  padding: 8px 0 !important;
-                  line-height: 1.6 !important;
-                  font-weight: bold !important;
-                  display: flex !important;
-                  align-items: center !important;
                 }
-                marquee * { 
-                  color: red !important;
-                  line-height: 1.6 !important;
-                }
-                /* Target the container of the marquee to ensure it doesn't clip */
                 marquee.parentElement, .breaking-news-container {
-                  height: auto !important;
-                  min-height: 45px !important;
                   overflow: visible !important;
-                  padding: 2px 0 !important;
                 }
               `;
               document.head.appendChild(style);
@@ -140,8 +148,25 @@ class _WebsiteViewScreenState extends State<WebsiteViewScreen> {
             return NavigationDecision.navigate;
           },
         ),
-      )
-      ..loadRequest(Uri.parse('https://infogujarat.com/'));
+      );
+
+    // Improve media behavior and cache reuse on Android.
+    final platformController = _controller!.platform;
+    if (platformController is AndroidWebViewController) {
+      platformController.setMediaPlaybackRequiresUserGesture(false);
+
+      // Prefer cached resources when possible to reduce repeat image downloads.
+      // Uses dynamic invocation so it stays compatible across plugin versions.
+      try {
+        final dynamic androidController = platformController;
+        // Android WebSettings.LOAD_CACHE_ELSE_NETWORK = 1
+        androidController.setCacheMode(1);
+      } catch (_) {
+        // Ignore if cache mode API is unavailable in current plugin version.
+      }
+    }
+
+    _controller!.loadRequest(Uri.parse('https://infogujarat.com/'));
   }
 
   @override
